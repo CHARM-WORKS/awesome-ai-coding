@@ -1,4 +1,13 @@
 const filters = document.querySelector("#filters");
+function hideBrokenIcon(image) {
+  if (image instanceof HTMLImageElement && image.matches(".tool-mark img")) image.hidden = true;
+}
+
+document.addEventListener("error", (event) => hideBrokenIcon(event.target), true);
+for (const image of document.querySelectorAll(".tool-mark img")) {
+  if (image.complete && !image.naturalWidth) hideBrokenIcon(image);
+}
+
 const catalog = document.querySelector("#entries");
 const rows = [...catalog.querySelectorAll(".entry")].map((element) => ({
   element,

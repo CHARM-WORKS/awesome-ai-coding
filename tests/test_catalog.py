@@ -37,15 +37,19 @@ class CatalogTest(unittest.TestCase):
         self.assertFalse(recent(self.by_name["SolidCraft"], date(2026, 11, 24)))
 
     def test_snapshot_retains_verified_values_and_preserves_zero(self):
+        avatar = "https://avatars.githubusercontent.com/u/123?v=4"
+
         def fetch(repo):
             if repo == "aider-ai/aider":
-                return {"stargazers_count": 0, "forks_count": 0, "pushed_at": None}
+                return {"stargazers_count": 0, "forks_count": 0, "pushed_at": None,
+                        "owner": {"avatar_url": avatar}}
             raise IncompleteRead(b"incomplete GitHub response")
 
         cached = {"tangency-labs/solidcraft": {"stars": 4, "fetched": "2026-11-16T00:00:00Z"}}
         entries = [self.by_name["Aider"], self.by_name["SolidCraft"], self.by_name["Cursor"]]
         snapshot = refresh_stats(entries, cached, fetch)
         self.assertEqual(snapshot["aider-ai/aider"]["stars"], 0)
+        self.assertEqual(snapshot["aider-ai/aider"]["avatar"], avatar)
         self.assertEqual(snapshot["tangency-labs/solidcraft"], cached["tangency-labs/solidcraft"])
         self.assertEqual(len(snapshot), 2)
 
@@ -56,3 +60,14 @@ class CatalogTest(unittest.TestCase):
         self.assertIn('class="featured-main"', page)
         self.assertIn('data-source="docs"', page)
         self.assertIn('data-source="unlinked"', page)
+
+    def test_cards_prefer_project_icons_and_use_publisher_avatars_as_fallback(self):
+        avatar = "https://avatars.githubusercontent.com/u/123?v=4"
+        stats = {"aider-ai/aider": {"avatar": avatar, "stars": 0}, "microsoft/autogen": {"avatar": avatar}}
+        page = render_page("Example", [self.by_name[name] for name in ("Aider", "AutoGen", "OpenHands")],
+                           stats, [], date(2026, 11, 17))
+        self.assertIn('src="https://aider.chat/assets/icons/favicon-32x32.png"', page)
+        self.assertEqual(page.count(f'src="{avatar}&amp;s=96"'), 1)
+        self.assertIn('class="star-icon" aria-hidden="true"', page)
+        self.assertIn('data-stars="0"', page)
+        self.assertNotIn('class="entry-columns"', page)
