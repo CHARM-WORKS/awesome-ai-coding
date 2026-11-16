@@ -29,26 +29,26 @@ class CatalogTest(unittest.TestCase):
 
     def test_table_schemas_and_changelog(self):
         self.assertIn("VS Code", self.by_name["Tabby"].details)
-        self.assertEqual(self.by_name["Aider"].repo, "aider-chat/aider")
+        self.assertEqual(self.by_name["Aider"].repo, "aider-ai/aider")
         self.assertEqual(self.by_name["SolidCraft"].added, "2026-11-16")
         self.assertTrue(recent(self.by_name["SolidCraft"], date(2026, 11, 17)))
         self.assertFalse(recent(self.by_name["SolidCraft"], date(2026, 11, 24)))
 
     def test_snapshot_retains_verified_values_and_preserves_zero(self):
         def fetch(repo):
-            if repo == "aider-chat/aider":
+            if repo == "aider-ai/aider":
                 return {"stargazers_count": 0, "forks_count": 0, "pushed_at": None}
             raise IncompleteRead(b"incomplete GitHub response")
 
         cached = {"tangency-labs/solidcraft": {"stars": 4, "fetched": "2026-11-16T00:00:00Z"}}
         entries = [self.by_name["Aider"], self.by_name["SolidCraft"], self.by_name["Cursor"]]
         snapshot = refresh_stats(entries, cached, fetch)
-        self.assertEqual(snapshot["aider-chat/aider"]["stars"], 0)
+        self.assertEqual(snapshot["aider-ai/aider"]["stars"], 0)
         self.assertEqual(snapshot["tangency-labs/solidcraft"], cached["tangency-labs/solidcraft"])
         self.assertEqual(len(snapshot), 2)
 
     def test_static_page_contains_all_entries_and_escapes_text(self):
-        page = render_page("<Example>", self.entries, {}, ["github:aider-chat/aider"], date(2026, 11, 17))
+        page = render_page("<Example>", self.entries, {}, ["github:aider-ai/aider"], date(2026, 11, 17))
         self.assertIn("&lt;Example&gt;", page)
         self.assertEqual(len(re.findall(r'<article class="entry"', page)), len(self.entries))
         self.assertIn('class="featured-main"', page)
