@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Browse AI coding agents, IDEs, extensions, MCP servers, and more.">
+  <title>{{TITLE}}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="./catalog.css">
+  <script src="./catalog.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="shell masthead-inner">
+      <a class="brand" href="./"><span aria-hidden="true" class="brand-mark"></span> Awesome AI Coding</a>
+      <nav class="header-links" aria-label="Site"><a href="#catalog">Browse tools</a><a href="{{README}}">View README</a></nav>
+    </div>
+  </header>
+  <main class="shell">
+    <h1>{{TITLE}}</h1>
+    {{FEATURED}}
+    <section id="catalog" aria-labelledby="catalog-heading">
+      <div class="catalog-heading">
+        <h2 id="catalog-heading">Tool catalog</h2>
+        <p>{{STATS}}</p>
+      </div>
+      <form id="filters" role="search" hidden>
+        <label class="search-label" for="search">Search the catalog</label>
+        <input type="search" id="search" name="q" placeholder="Search tools, creators, and features">
+        <div class="filter-bar">
+          <label>Category<select name="category"><option value="">All categories</option>{{CATEGORIES}}</select></label>
+          <label>README maturity<select name="maturity"><option value="">Any maturity</option>{{MATURITIES}}</select></label>
+          <label>Source<select name="source"><option value="">All sources</option>{{SOURCES}}</select></label>
+          <label class="sort">Sort by<select name="sort">
+            <option value="">Name A–Z</option><option value="stars">Most stars</option>
+            <option value="forks">Most forks</option><option value="pushed">Latest push</option>
+          </select></label>
+        </div>
+      </form>
+      <div class="results-line">
+        <p id="result-count" role="status">{{COUNT}} tools</p>
+        <button id="clear" type="button" hidden>Clear filters</button>
+      </div>
+      <div class="entry-columns" aria-hidden="true">
+        <span>Tool</span><span>Category</span><span>Stars</span><span>Forks</span><span>Last push</span>
+      </div>
+      <p id="empty" hidden>No tools match your search. Try another term or clear the filters.</p>
+      <div id="entries">{{ROWS}}</div>
+    </section>
+  </main>
+  <footer class="shell footer"><a href="{{README}}">Contribute on GitHub</a></footer>
+</body>
+</html>

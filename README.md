@@ -2,6 +2,8 @@
 
 A curated, comprehensive list of awesome AI coding tools, autonomous agents, AI-native IDEs, extensions, LLM orchestrators, inference engines, vector databases, MCP servers, custom agent skills, security proxies, and educational resources.
 
+[Browse the interactive catalog](https://youxufkhan.github.io/awesome-ai-coding/)
+
 ### 🏷️ Maturity Rating Legend
 * 🟢 **Stable / Production-Ready**: Established, highly stable tools with low bug rates and robust production suitability.
 * 🟡 **Active Development**: Fully functional tools undergoing rapid iterations. Expect frequent feature updates.

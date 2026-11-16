@@ -1,2 +1,6 @@
 .omo/
 *.bak
+
+__pycache__/
+/dist/
+/.catalog-stats.json

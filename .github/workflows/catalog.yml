@@ -1,0 +1,71 @@
+name: Publish catalog
+
+on:
+  pull_request:
+    paths:
+      - README.md
+      - catalog/**
+      - tests/test_catalog.py
+      - .github/workflows/catalog.yml
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - catalog/**
+      - tests/test_catalog.py
+      - .github/workflows/catalog.yml
+  schedule:
+    - cron: "23 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Verify README ingestion
+        run: python -m unittest discover -s tests
+      - name: Restore GitHub stats
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/cache@v4
+        with:
+          path: .catalog-stats.json
+          key: catalog-stats-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: catalog-stats-v1-
+      - name: Build pull request preview
+        if: github.event_name == 'pull_request'
+        run: python catalog/build.py
+      - name: Build and refresh GitHub stats
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: python catalog/build.py --refresh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-pages-artifact@v4
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - name: Publish to GitHub Pages
+        id: pages
+        uses: actions/deploy-pages@v4
