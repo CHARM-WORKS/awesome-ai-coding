@@ -2,6 +2,7 @@
 from argparse import ArgumentParser
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
+from hashlib import sha256
 from html import escape
 from http.client import HTTPException
 import json
@@ -334,6 +335,8 @@ def render_page(title, entries, stats, featured_ids, today):
     )
     replacements = {
         "TITLE": escape(title), "README": escape(README_URL), "FEATURED": featured_section,
+        "CSS": sha256((ROOT / "catalog/catalog.css").read_bytes()).hexdigest()[:16],
+        "JS": sha256((ROOT / "catalog/catalog.js").read_bytes()).hexdigest()[:16],
         "CATEGORIES": options((category, short_category(category)) for category in categories),
         "MATURITIES": options((label, label) for label in MATURITY.values()),
         "SOURCES": options(SOURCE.items()), "ROWS": rows, "COUNT": f"{len(entries):,}", "STATS": status,
