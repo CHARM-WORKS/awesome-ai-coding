@@ -71,3 +71,10 @@ class CatalogTest(unittest.TestCase):
         self.assertIn('class="star-icon" aria-hidden="true"', page)
         self.assertIn('data-stars="0"', page)
         self.assertNotIn('class="entry-columns"', page)
+
+    def test_category_icons_are_visible_on_cards_with_accessible_labels(self):
+        page = render_page("Example", self.entries, {}, ["github:aider-ai/aider"], date(2026, 11, 17))
+        for icon in ("terminal", "editor", "extension", "skills", "shield", "network",
+                     "tools", "plug", "chip", "database", "layout", "book"):
+            self.assertIn(f'data-category-icon="{icon}"', page)
+        self.assertRegex(page, r'data-category-icon="terminal" aria-hidden="true".*?</svg>CLI agents')

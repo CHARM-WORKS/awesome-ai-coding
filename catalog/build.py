@@ -211,21 +211,42 @@ def refresh_stats(entries, cached, fetch):
     return snapshot
 
 
+CATEGORIES = {
+    "AI Coding CLI Agents & SWE Systems": ("CLI agents", "terminal", "M2 3h12v10H2z M4.5 6l2 2-2 2 M8 10h3"),
+    "AI-Native IDEs & Cloud Workspaces": ("IDEs & workspaces", "editor", "M2 3h12v10H2z M2 6h12 M6 6v7"),
+    "AI Coding Extensions & Plugins": ("Editor extensions", "extension", "M2.5 3.5h4V5a1.5 1.5 0 0 0 3 0V3.5h4v4H12a1.5 1.5 0 0 0 0 3h1.5v3h-11z"),
+    "Custom Agent Skills & Plugins": ("Agent skills", "skills", "M8 2l1.6 4.4L14 8l-4.4 1.6L8 14l-1.6-4.4L2 8l4.4-1.6z"),
+    "AI Gateways, Proxies & Agent Security": ("Gateways & security", "shield", "M8 2l5 2v3.3c0 2.8-2 4.8-5 6.7-3-1.9-5-3.9-5-6.7V4z M6 8l1.3 1.3L10 6.5"),
+    "AI Agent Frameworks & Multi-Agent Platforms": ("Agent frameworks", "network", "M6 2h4v4H6z M2 10h4v4H2z M10 10h4v4h-4z M8 6v2 M4 10V8h8v2"),
+    "LLM DevTools & Orchestration Infrastructure": ("LLM developer tools", "tools", "M13.5 2.5l-3 3-1.8-1.8 3-3 M13.5 2.5c1 3.1-1.3 5.9-4.3 5.4L4 13.1a1.6 1.6 0 0 1-2.2-2.2L7 5.7C6.5 2.7 9 .2 11.7.7"),
+    "Model Context Protocol (MCP) Servers": ("MCP servers", "plug", "M5.5 2v3 M10.5 2v3 M4 5h8v2a4 4 0 0 1-8 0z M8 11v3"),
+    "LLM Inference & Local Serving Engines": ("Inference engines", "chip", "M4 4h8v8H4z M6.5 6.5h3v3h-3z M6 2v2 M10 2v2 M6 12v2 M10 12v2 M2 6h2 M2 10h2 M12 6h2 M12 10h2"),
+    "Vector Databases & Vector Stores": ("Vector databases", "database", "M3 4a5 2 0 1 0 10 0 5 2 0 1 0-10 0z M3 4v8a5 2 0 0 0 10 0V4 M3 8a5 2 0 0 0 10 0"),
+    "Vibe Coding & Generative UI Tools": ("Generative UI", "layout", "M2 3h12v10H2z M2 6h12 M8 6v7 M8 9.5h6"),
+    "AI Learning & Educational Resources": ("Learning resources", "book", "M8 4c-1.6-1-3.5-1.2-6-.5v9c2.5-.7 4.4-.5 6 .5 1.6-1 3.5-1.2 6-.5v-9c-2.5-.7-4.4-.5-6 .5v9"),
+}
+
+
 def short_category(category):
-    return {
-        "AI Coding CLI Agents & SWE Systems": "CLI agents",
-        "AI-Native IDEs & Cloud Workspaces": "IDEs & workspaces",
-        "AI Coding Extensions & Plugins": "Editor extensions",
-        "Custom Agent Skills & Plugins": "Agent skills",
-        "AI Gateways, Proxies & Agent Security": "Gateways & security",
-        "AI Agent Frameworks & Multi-Agent Platforms": "Agent frameworks",
-        "LLM DevTools & Orchestration Infrastructure": "LLM developer tools",
-        "Model Context Protocol (MCP) Servers": "MCP servers",
-        "LLM Inference & Local Serving Engines": "Inference engines",
-        "Vector Databases & Vector Stores": "Vector databases",
-        "Vibe Coding & Generative UI Tools": "Generative UI",
-        "AI Learning & Educational Resources": "Learning resources",
-    }.get(category, category)
+    return CATEGORIES[category][0] if category in CATEGORIES else category
+
+
+def render_category(category):
+    label = escape(short_category(category))
+    if category not in CATEGORIES:
+        return f'<span class="category-label">{label}</span>'
+    _, icon, _ = CATEGORIES[category]
+    return (f'<span class="category-label"><svg viewBox="0 0 16 16" width="14" height="14" '
+            f'data-category-icon="{icon}" aria-hidden="true" focusable="false">'
+            f'<use href="#category-{icon}"></use></svg>{label}</span>')
+
+
+def render_category_icons():
+    symbols = "".join(
+        f'<symbol id="category-{icon}" viewBox="0 0 16 16"><path d="{path}"></path></symbol>'
+        for _, icon, path in CATEGORIES.values()
+    )
+    return f'<svg class="category-icons" width="0" height="0" aria-hidden="true">{symbols}</svg>'
 
 
 def day_label(value):
@@ -288,7 +309,7 @@ def render_entry(entry, stats, today):
     return f'''<article class="entry" {dataset}>
   <header class="entry-tool">{render_mark(entry, measured)}
     <div><h3>{render_link(entry)}</h3>
-      <p class="entry-category">{escape(" / ".join(short_category(c) for c in entry.categories))}</p>
+      <p class="entry-category">{"".join(render_category(category) for category in entry.categories)}</p>
     </div>
   </header>
   <p class="entry-description">{escape(entry.description)}</p>
@@ -314,7 +335,7 @@ def render_page(title, entries, stats, featured_ids, today):
           {render_mark(entry, measured)}
           <div class="feature-body">
             <div class="feature-heading"><h3>{render_link(entry)}</h3>
-              <a class="feature-category" href="{escape(browse)}">{escape(short_category(category))}</a>
+              <a class="feature-category" href="{escape(browse)}">{render_category(category)}</a>
             </div>
             <p>{escape(entry.description)}</p>{metrics}
           </div>
@@ -335,6 +356,7 @@ def render_page(title, entries, stats, featured_ids, today):
     )
     replacements = {
         "TITLE": escape(title), "README": escape(README_URL), "FEATURED": featured_section,
+        "ICONS": render_category_icons(),
         "CSS": sha256((ROOT / "catalog/catalog.css").read_bytes()).hexdigest()[:16],
         "JS": sha256((ROOT / "catalog/catalog.js").read_bytes()).hexdigest()[:16],
         "CATEGORIES": options((category, short_category(category)) for category in categories),
