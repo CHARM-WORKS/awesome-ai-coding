@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Browse AI coding agents, IDEs, extensions, MCP servers, and more.">
   <title>{{TITLE}}</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600&family=Geist:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="./catalog.css">
   <script src="./catalog.js" defer></script>
 </head>
@@ -13,12 +13,17 @@
   <header class="masthead">
     <div class="shell masthead-inner">
       <a class="brand" href="./"><span aria-hidden="true" class="brand-mark"></span> Awesome AI Coding</a>
-      <nav class="header-links" aria-label="Site"><a href="#catalog">Browse tools</a><a href="{{README}}">View README</a></nav>
+      <nav class="header-links" aria-label="Site"><a href="{{README}}">View README</a></nav>
     </div>
   </header>
   <main class="shell">
-    <h1>{{TITLE}}</h1>
-    {{FEATURED}}
+    <div class="intro">
+      <div class="intro-copy">
+        <h1>{{TITLE}}</h1>
+        <a class="browse" href="#catalog">Browse {{COUNT}} tools <span aria-hidden="true">↓</span></a>
+      </div>
+      {{FEATURED}}
+    </div>
     <section id="catalog" aria-labelledby="catalog-heading">
       <div class="catalog-heading">
         <h2 id="catalog-heading">Tool catalog</h2>
@@ -26,7 +31,10 @@
       </div>
       <form id="filters" role="search" hidden>
         <label class="search-label" for="search">Search the catalog</label>
-        <input type="search" id="search" name="q" placeholder="Search tools, creators, and features">
+        <div class="search-field">
+          <span class="search-icon" aria-hidden="true"></span>
+          <input type="search" id="search" name="q" placeholder="Tool, creator, or feature">
+        </div>
         <div class="filter-bar">
           <label>Category<select name="category"><option value="">All categories</option>{{CATEGORIES}}</select></label>
           <label>README maturity<select name="maturity"><option value="">Any maturity</option>{{MATURITIES}}</select></label>

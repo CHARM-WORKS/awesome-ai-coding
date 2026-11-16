@@ -228,10 +228,27 @@ def render_link(entry):
     return f'<a href="{escape(entry.url)}">{name}</a>' if entry.url else name
 
 
+def render_mark(entry):
+    words = re.findall(r"[^\W_]+", entry.name)
+    initials = ("".join(word[0] for word in words[:2]) if len(words) > 1
+                else entry.name[:2]).upper()
+    return f'<span class="tool-mark" aria-hidden="true">{escape(initials)}</span>'
+
+
+def render_metrics(measured, class_name="metrics"):
+    stars, forks, pushed = (measured.get(key) for key in ("stars", "forks", "pushed"))
+    fetched = measured.get("fetched")
+    stats_title = f' title="Stats fetched {day_label(fetched)}"' if fetched else ""
+    return f'''<dl class="{class_name}"{stats_title}>
+    <div><dt>Stars</dt><dd>{f"{stars:,}" if stars is not None else "—"}</dd></div>
+    <div><dt>Forks</dt><dd>{f"{forks:,}" if forks is not None else "—"}</dd></div>
+    <div><dt>Last push</dt><dd>{f'<time datetime="{escape(pushed)}">{day_label(pushed)}</time>' if pushed else "—"}</dd></div>
+  </dl>'''
+
+
 def render_entry(entry, stats, today):
     measured = stats.get(entry.repo, {})
     stars, forks, pushed = (measured.get(key) for key in ("stars", "forks", "pushed"))
-    fetched = measured.get("fetched")
     search = " ".join([entry.name, entry.repo or "", entry.creator, entry.description,
                        entry.details, *entry.categories, *(short_category(c) for c in entry.categories),
                        *entry.comparison.values()])
@@ -251,17 +268,14 @@ def render_entry(entry, stats, today):
     extra = [escape(value) for value in (entry.creator, entry.details) if value]
     extra.extend(f"{escape(key)}: {escape(value)}" for key, value in entry.comparison.items() if value)
     details = f'<details><summary>Tool details</summary><p>{"<br>".join(extra)}</p></details>' if extra else ""
-    stats_title = f' title="Stats fetched {day_label(fetched)}"' if fetched else ""
     return f'''<article class="entry" {dataset}>
-  <div class="entry-body"><h3>{render_link(entry)}</h3><p>{escape(entry.description)}</p>
-    <div class="badges">{"".join(badges)}</div>{details}
+  <div class="entry-tool">{render_mark(entry)}
+    <div class="entry-body"><h3>{render_link(entry)}</h3><p>{escape(entry.description)}</p>
+      <div class="badges">{"".join(badges)}</div>{details}
+    </div>
   </div>
   <div class="entry-category">{escape(" / ".join(short_category(c) for c in entry.categories))}</div>
-  <dl class="metrics"{stats_title}>
-    <div><dt>Stars</dt><dd>{f"{stars:,}" if stars is not None else "—"}</dd></div>
-    <div><dt>Forks</dt><dd>{f"{forks:,}" if forks is not None else "—"}</dd></div>
-    <div><dt>Last push</dt><dd>{f'<time datetime="{escape(pushed)}">{day_label(pushed)}</time>' if pushed else "—"}</dd></div>
-  </dl>
+  {render_metrics(measured)}
 </article>'''
 
 
@@ -276,9 +290,16 @@ def render_page(title, entries, stats, featured_ids, today):
         category = entry.categories[0]
         browse = "?" + urlencode({"category": category}) + "#catalog"
         class_name = "featured-pick" if featured else "featured-main"
+        measured = stats.get(entry.repo, {})
+        metrics = render_metrics(measured, "feature-metrics") if measured else ""
         featured.append(f'''<article class="{class_name}">
-          <a class="feature-category" href="{escape(browse)}">{escape(short_category(category))}</a>
-          <h3>{render_link(entry)}</h3><p>{escape(entry.description)}</p>
+          {render_mark(entry)}
+          <div class="feature-body">
+            <div class="feature-heading"><h3>{render_link(entry)}</h3>
+              <a class="feature-category" href="{escape(browse)}">{escape(short_category(category))}</a>
+            </div>
+            <p>{escape(entry.description)}</p>{metrics}
+          </div>
         </article>''')
 
     categories = sorted({category for entry in entries for category in entry.categories}, key=short_category)
