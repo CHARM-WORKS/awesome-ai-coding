@@ -30,6 +30,8 @@ class CatalogTest(unittest.TestCase):
     def test_table_schemas_and_changelog(self):
         self.assertIn("VS Code", self.by_name["Tabby"].details)
         self.assertEqual(self.by_name["Aider"].repo, "aider-ai/aider")
+        self.assertIsNone(self.by_name["GitHub Copilot"].repo)
+        self.assertEqual(self.by_name["GitHub Copilot Workspace"].source, "web")
         self.assertEqual(self.by_name["SolidCraft"].added, "2026-11-16")
         self.assertTrue(recent(self.by_name["SolidCraft"], date(2026, 11, 17)))
         self.assertFalse(recent(self.by_name["SolidCraft"], date(2026, 11, 24)))

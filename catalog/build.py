@@ -19,6 +19,7 @@ README_URL = "https://github.com/youxufkhan/awesome-ai-coding#readme"
 MATURITY = {"🟢": "Stable", "🟡": "Active development", "🔴": "Experimental"}
 IDENTITY = re.compile(r"^(?:(?P<badge>[🟢🟡🔴])\s+)?\*\*(?:\[(?P<link_name>.+?)\]\((?P<url>https?://[^\s)]+)\)|(?P<plain>.+?))\*\*")
 SOURCE = {"github": "GitHub", "docs": "Docs", "web": "Website", "unlinked": "Unlinked"}
+GITHUB_SITE_PATHS = {"apps", "collections", "features", "marketplace", "orgs", "sponsors", "topics"}
 
 
 @dataclass
@@ -38,7 +39,8 @@ class Entry:
     def repo(self):
         if self.url and urlsplit(self.url).hostname == "github.com":
             path = urlsplit(self.url).path.strip("/").split("/")
-            if len(path) >= 2 and all(re.fullmatch(r"[\w.-]+", part) for part in path[:2]):
+            if (len(path) >= 2 and path[0].lower() not in GITHUB_SITE_PATHS
+                    and all(re.fullmatch(r"[\w.-]+", part) for part in path[:2])):
                 return "/".join(path[:2]).lower()
         return None
 
